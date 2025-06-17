@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "TRPC WS adapter for hono and bun",
   "type": "module",
-  "private": true,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
