@@ -1,0 +1,36 @@
+{
+  "name": "@valkyrie-resistance/trpc-ws-hono-bun-adapter",
+  "version": "0.1.0",
+  "description": "TRPC WS adapter for hono and bun",
+  "type": "module",
+  "private": true,
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "src", "package.json", "LICENSE.txt", "README.md", "tsconfig.json"],
+  "scripts": {
+    "test": "bun test",
+    "lint": "biome check",
+    "lint:fix": "biome check --write .",
+    "bundle": "npx tsup src/index.ts --format cjs,esm --dts --clean --sourcemap"
+  },
+  "keywords": ["bun", "trpc", "adapter", "websocket", "hono", "ws"],
+  "repository": {
+    "url": "git+https://github.com/Valkyrie-Resistance/trpc-ws-hono-bun-adapter"
+  },
+  "bugs": "https://github.com/Valkyrie-Resistance/trpc-ws-hono-bun-adapter/issues",
+  "author": "PejeDev <hi@pejedev.xyz>",
+  "license": "MIT",
+  "devDependencies": {
+    "@trpc/server": "^11.4.1",
+    "bun-types": "^1.2.16",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "@biomejs/biome": "1.9.4",
+    "hono": "^4.7.11",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "@trpc/server": "^11.4.1"
+  }
+}
