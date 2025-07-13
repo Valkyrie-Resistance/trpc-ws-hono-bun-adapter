@@ -1,6 +1,6 @@
 {
   "name": "@valkyrie-resistance/trpc-ws-hono-bun-adapter",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "TRPC WS adapter for hono and bun",
   "type": "module",
   "main": "dist/index.js",

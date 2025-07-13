@@ -4,19 +4,20 @@ import {
   callTRPCProcedure,
   getErrorShape,
   getTRPCErrorFromUnknown,
-  type inferRouterContext,
   isTrackedEnvelope,
   transformTRPCResponse,
 } from '@trpc/server'
-import { type TRPCRequestInfo, parseConnectionParamsFromUnknown } from '@trpc/server/http'
 import { isObservable, observableToAsyncIterable } from '@trpc/server/observable'
 import {
   type TRPCClientOutgoingMessage,
+  type TRPCConnectionParamsMessage,
+  type TRPCRequestInfo,
   type TRPCResponseMessage,
   type TRPCResultMessage,
+  type inferRouterContext,
+  parseConnectionParamsFromUnknown,
   parseTRPCMessage,
-} from '@trpc/server/rpc'
-import type { TRPCConnectionParamsMessage } from '@trpc/server/unstable-core-do-not-import'
+} from '@trpc/server/unstable-core-do-not-import'
 import type { ServerWebSocket, WebSocketHandler } from 'bun'
 import { Hono } from 'hono'
 import { createBunWebSocket } from 'hono/bun'
@@ -55,7 +56,7 @@ export function createBunWSHandler<TRouter extends AnyRouter>(
     connectionParams: TRPCRequestInfo['connectionParams'],
   ) {
     const ctxPromise = createContext?.({
-      req: client.data.req,
+      req: client,
       res: client,
       info: {
         url,
@@ -77,7 +78,7 @@ export function createBunWSHandler<TRouter extends AnyRouter>(
         path: undefined,
         type: 'unknown',
         ctx: undefined,
-        req: client.data.req,
+        req: client,
         input: undefined,
       })
       respond(client, {
@@ -114,7 +115,7 @@ export function createBunWSHandler<TRouter extends AnyRouter>(
     const { id, method, jsonrpc } = msg
     const type = method
     const { path, lastEventId } = msg.params
-    const req = client.data.req
+    const req = client
     const clientAbortControllers = client.data.abortControllers
     let { input } = msg.params
     const ctx = await client.data.ctx
@@ -319,9 +320,8 @@ export function createBunWSHandler<TRouter extends AnyRouter>(
       client.data.abortController = new AbortController()
       client.data.abortControllers = new Map()
 
-      const url = createURL(client)
+      const url = client.data.url
       client.data.ctx = createClientCtx.bind(null, client, url)
-
       const connectionParams = url.searchParams.get('connectionParams') === '1'
 
       if (!connectionParams) {
@@ -353,6 +353,7 @@ export function createBunWSHandler<TRouter extends AnyRouter>(
         if (client.data.ctx instanceof Function) {
           const msg = msgs.shift() as TRPCConnectionParamsMessage
           client.data.ctx = client.data.ctx(parseConnectionParamsFromUnknown(msg.data))
+          return
         }
 
         const promises = []
@@ -396,23 +397,4 @@ function run<TValue>(fn: () => TValue): TValue {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return !!value && !Array.isArray(value) && typeof value === 'object'
-}
-
-function createURL(client: ServerWebSocket<BunHonoWSClientCtx<AnyRouter>>): URL {
-  try {
-    // biome-ignore lint/suspicious/noExplicitAny: I don't know why this AnyRouter differs the one exported from @trpc/server
-    const data = client.data as any
-    const urlData = data.url
-
-    const protocol = urlData.protocol
-
-    const host = urlData.host ?? 'localhost'
-    return new URL(urlData.pathname, `${protocol}//${host}`)
-  } catch (cause) {
-    throw new TRPCError({
-      code: 'BAD_REQUEST',
-      message: 'Invalid URL',
-      cause,
-    })
-  }
 }
