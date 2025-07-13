@@ -18,7 +18,10 @@ export type BunHonoWSAdapterOptions<TRouter extends AnyRouter> = BaseHandlerOpti
   TRouter,
   ServerWebSocket<BunHonoWSClientCtx<TRouter>>
 > &
-  CreateContextCallback<inferRouterContext<TRouter>, CreateBunHonoWSSContextFn<TRouter>>
+  CreateContextCallback<
+    inferRouterContext<TRouter>,
+    (opts: CreateBunHonoWSSContextFnOptions<TRouter>) => MaybePromise<inferRouterContext<TRouter>>
+  >
 
 export type BunHonoWSClientCtx<TRouter extends AnyRouter> = {
   abortController: AbortController
